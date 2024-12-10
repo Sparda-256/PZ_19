@@ -54,8 +54,6 @@ CREATE TABLE RepairRequests (
     resolutionDate DATE,
     technicianID INT,
     customerID INT,
-    CustomerName NVARCHAR(255) NOT NULL DEFAULT(''),
-    CustomerPhone NVARCHAR(15) NOT NULL DEFAULT(''),
     CONSTRAINT FK_RepairAppliance FOREIGN KEY (applianceID) REFERENCES ApplianceCategories(applianceID),
     CONSTRAINT FK_Technician FOREIGN KEY (technicianID) REFERENCES Accounts(accountID),
     CONSTRAINT FK_Customer FOREIGN KEY (customerID) REFERENCES Accounts(accountID)
@@ -120,3 +118,17 @@ VALUES
     ('Скорее всего потребуется мотор обдува!', 2, 7),
     ('Интересная проблема', 2, 1),
     ('Очень странно, будем разбираться!', 3, 6);
+
+ALTER TABLE [RepairRequests]
+ADD [CustomerName] NVARCHAR(255) NOT NULL DEFAULT(''),
+    [CustomerPhone] NVARCHAR(15) NOT NULL DEFAULT('');
+
+UPDATE [RepairRequests]
+SET [CustomerName] = N'Иванов Иван Иванович',
+    [CustomerPhone] = N'+79991234567'
+WHERE [requestID] = 1;
+
+UPDATE [RepairRequests]
+SET [CustomerName] = N'Петров Петр Петрович',
+    [CustomerPhone] = N'+79991234568'
+WHERE [requestID] = 2;
