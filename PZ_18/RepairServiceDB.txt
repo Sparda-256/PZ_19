@@ -1,0 +1,134 @@
+CREATE DATABASE RepairServiceDB;
+
+-- Использование базы данных
+USE RepairServiceDB;
+
+-- Таблица категорий пользователей
+CREATE TABLE UserCategories (
+    categoryID INT PRIMARY KEY IDENTITY(1,1),
+    categoryName VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Вставка категорий пользователей
+INSERT INTO UserTypes (typeName)
+VALUES 
+    ('Менеджер'),
+    ('Мастер'),
+    ('Оператор'),
+    ('Заказчик');
+
+-- Таблица аккаунтов пользователей
+CREATE TABLE Accounts (
+    accountID INT PRIMARY KEY IDENTITY(1,1),
+    fullName VARCHAR(255) NOT NULL,
+    phoneNumber VARCHAR(15) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    userPassword VARCHAR(255) NOT NULL,
+    categoryID INT NOT NULL,
+    CONSTRAINT FK_UserCategory FOREIGN KEY (categoryID) REFERENCES UserCategories(categoryID)
+);
+
+-- Таблица категорий бытовой техники
+CREATE TABLE ApplianceCategories (
+    applianceID INT PRIMARY KEY IDENTITY(1,1),
+    applianceName VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- Вставка категорий бытовой техники
+INSERT INTO ApplianceCategories (applianceName)
+VALUES 
+    ('Фен'),
+    ('Тостер'),
+    ('Холодильник'),
+    ('Стиральная машина'),
+    ('Мультиварка');
+
+-- Таблица заявок на ремонт
+CREATE TABLE RepairRequests (
+    requestID INT PRIMARY KEY IDENTITY(1,1),
+    creationDate DATE NOT NULL,
+    applianceID INT NOT NULL,
+    applianceModel VARCHAR(255) NOT NULL,
+    issueDescription TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    resolutionDate DATE,
+    technicianID INT,
+    customerID INT,
+    CONSTRAINT FK_RepairAppliance FOREIGN KEY (applianceID) REFERENCES ApplianceCategories(applianceID),
+    CONSTRAINT FK_Technician FOREIGN KEY (technicianID) REFERENCES Accounts(accountID),
+    CONSTRAINT FK_Customer FOREIGN KEY (customerID) REFERENCES Accounts(accountID)
+);
+
+-- Таблица деталей для ремонта
+CREATE TABLE RepairComponents (
+    componentID INT PRIMARY KEY IDENTITY(1,1),
+    requestID INT NOT NULL,
+    componentName VARCHAR(255) NOT NULL,
+    componentQuantity INT DEFAULT 1,
+    CONSTRAINT FK_RepairRequestComponents FOREIGN KEY (requestID) REFERENCES RepairRequests(requestID)
+);
+
+-- Таблица заметок
+CREATE TABLE Notes (
+    noteID INT PRIMARY KEY IDENTITY(1,1),
+    noteText TEXT NOT NULL,
+    technicianID INT,
+    requestID INT,
+    CONSTRAINT FK_NoteTechnician FOREIGN KEY (technicianID) REFERENCES Accounts(accountID),
+    CONSTRAINT FK_NoteRequest FOREIGN KEY (requestID) REFERENCES RepairRequests(requestID)
+);
+
+-- Вставка пользователей
+INSERT INTO Accounts (fullName, phoneNumber, username, userPassword, categoryID)
+VALUES 
+    ('Трубин Никита Юрьевич', '89210563128', 'kasoo', 'root', 1),
+    ('Мурашов Андрей Юрьевич', '89535078985', 'murashov123', 'qwerty', 2),
+    ('Степанов Андрей Викторович', '89210673849', 'test1', 'test1', 2),
+    ('Перина Анастасия Денисовна', '89990563748', 'perinaAD', '250519', 3),
+    ('Мажитова Ксения Сергеевна', '89994563847', 'krutiha1234567', '1234567890', 3),
+    ('Семенова Ясмина Марковна', '89994563847', 'login1', 'pass1', 2),
+    ('Баранова Эмилия Марковна', '89994563841', 'login2', 'pass2', 4),
+    ('Егорова Алиса Платоновна', '89994563842', 'login3', 'pass3', 4),
+    ('Титов Максим Иванович', '89994563843', 'login4', 'pass4', 4),
+    ('Иванов Марк Максимович', '89994563844', 'login5', 'pass5', 2);
+
+-- Вставка заявок на ремонт
+INSERT INTO RepairRequests (creationDate, applianceID, applianceModel, issueDescription, status, technicianID, customerID)
+VALUES 
+    ('2023-06-06', 1, 'Ладомир ТА112 белый', 'Перестал работать', 'В процессе ремонта', 2, 7),
+    ('2023-05-05', 2, 'Redmond RT-437 черный', 'Перестал работать', 'В процессе ремонта', 3, 7),
+    ('2022-07-07', 3, 'Indesit DS 316 W белый', 'Не морозит одна из камер холодильника', 'Готова к выдаче', 2, 8),
+    ('2023-08-02', 4, 'DEXP WM-F610NTMA/WW белый', 'Перестали работать многие режимы стирки', 'Новая заявка', NULL, 8),
+    ('2023-08-02', 5, 'Redmond RMC-M95 черный', 'Перестала включаться', 'Новая заявка', NULL, 9),
+    ('2023-08-02', 1, 'Ладомир ТА113 чёрный', 'Перестал работать', 'Готова к выдаче', 2, 7),
+    ('2023-07-09', 3, 'Indesit DS 314 W серый', 'Гудит, но не замораживает', 'Готова к выдаче', 2, 8);
+
+-- Вставка деталей для ремонта
+INSERT INTO RepairComponents (requestID, componentName, componentQuantity)
+VALUES 
+    (1, 'Мотор', 1),
+    (2, 'Термостат', 2),
+    (7, 'Компрессор', 1);
+
+-- Вставка заметок
+INSERT INTO Notes (noteText, technicianID, requestID)
+VALUES 
+    ('Интересная поломка', 2, 1),
+    ('Очень странно, будем разбираться!', 3, 2),
+    ('Скорее всего потребуется мотор обдува!', 2, 7),
+    ('Интересная проблема', 2, 1),
+    ('Очень странно, будем разбираться!', 3, 6);
+
+ALTER TABLE [RepairRequests]
+ADD [CustomerName] NVARCHAR(255) NOT NULL DEFAULT(''),
+    [CustomerPhone] NVARCHAR(15) NOT NULL DEFAULT('');
+
+UPDATE [RepairRequests]
+SET [CustomerName] = N'Иванов Иван Иванович',
+    [CustomerPhone] = N'+79991234567'
+WHERE [requestID] = 1;
+
+UPDATE [RepairRequests]
+SET [CustomerName] = N'Петров Петр Петрович',
+    [CustomerPhone] = N'+79991234568'
+WHERE [requestID] = 2;
