@@ -10,7 +10,7 @@ CREATE TABLE UserCategories (
 );
 
 -- Вставка категорий пользователей
-INSERT INTO UserTypes (typeName)
+INSERT INTO UserCategories (categoryName)
 VALUES 
     ('Менеджер'),
     ('Мастер'),
